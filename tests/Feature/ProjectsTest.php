@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -24,8 +25,10 @@ class ProjectsTest extends TestCase
             'description' => $this->faker->paragraph,
         ];
 
+        $user = User::factory()->create();
+
         // create a resource
-        $this->post($this->resource, $attributes)->assertRedirect($this->resource);
+        $this->actingAs($user)->post($this->resource, $attributes)->assertRedirect($this->resource);
 
         // assert the resource exists
         $this->assertDatabaseHas('projects', $attributes);
@@ -34,7 +37,7 @@ class ProjectsTest extends TestCase
         $this->get($this->resource)->assertSee($attributes['title']);
 
         // get one resource
-        $project = $this->get($this->resource.'/'. 1);
+        $project = $this->get($projectPath = $this->resource.'/'. 1);
         $project->assertSee($attributes['title']);
 
         $secondAttributes = [
@@ -45,10 +48,10 @@ class ProjectsTest extends TestCase
         $project->title = $secondAttributes['title'];
 
         // update that resource
-        $this->put($this->resource.'/'. 1, $secondAttributes)->assertRedirect($this->resource.'/'. 1);
+        $this->put($projectPath, $secondAttributes)->assertRedirect($this->resource.'/'. 1);
 
         // get resource
-        $project = $this->get($this->resource.'/'. 1);
+        $project = $this->get($projectPath);
         $project->assertSee($secondAttributes['title']);
 
         // delete the resource

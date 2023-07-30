@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendNewProjectMail;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
@@ -19,9 +20,12 @@ class ProjectController extends Controller
         // validate
 
         // save
-        Project::create(request(['title', 'description']));
+        $project = Project::create(request(['title', 'description']));
 
-        // redirect 
+        // send notice of project creation
+        SendNewProjectMail::dispatch($project);
+
+        // redirect
         return redirect('/projects');
     }
 
