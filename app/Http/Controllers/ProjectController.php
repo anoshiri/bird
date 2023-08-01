@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendNewProjectMail;
+use Exception;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Jobs\SendNewProjectMail;
 
 class ProjectController extends Controller
 {
@@ -20,9 +21,9 @@ class ProjectController extends Controller
         // validate
 
         // save
-        $project = Project::create(request(['title', 'description']));
+        $project = auth()->user()->projects()->create(request(['title', 'description']));
 
-        // send notice of project creation
+        // dispatch a job
         SendNewProjectMail::dispatch($project);
 
         // redirect
@@ -39,10 +40,20 @@ class ProjectController extends Controller
         // validate input
 
         // save to db
-        $project->title = $request->input('title');
-        $project->save();
+        $project->update(request(['title', 'description']));
 
         // return resource
         return redirect('/projects/'.$project->id);
+    }
+
+    public function destroy(Project $project)
+    {
+        if ($project->user_id <> auth()->user()->id) {
+            abort(403);
+        }
+
+        $project->delete();
+
+        return redirect('/projects');
     }
 }

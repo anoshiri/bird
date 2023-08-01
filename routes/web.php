@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -26,14 +27,18 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::controller(ProjectController::class)->group(function () {
         Route::get('projects', 'index')->name('projects');
-        Route::post('projects', 'store');
-        Route::get('projects/{project}', 'show');
-        Route::put('projects/{project}', 'update');
+        Route::post('projects', 'store')->name('projects.create');
+        Route::get('projects/{project}', 'show')->name('projects.show');
+        Route::patch('projects/{project}', 'update')->name('projects.update');
+        Route::delete('projects/{project}', 'destroy')->name('projects.destroy');
     });
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::controller(ProfileController::class)->group(function() {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
+    
 });
 
 require __DIR__.'/auth.php';

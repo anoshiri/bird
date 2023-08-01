@@ -4,10 +4,11 @@ namespace App\Jobs;
 
 use App\Models\Project;
 use Illuminate\Bus\Queueable;
+use App\Notifications\NewProjectNotification;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 class SendNewProjectMail implements ShouldQueue
 {
@@ -16,7 +17,7 @@ class SendNewProjectMail implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct(protected Project $project)
     {
         //
     }
@@ -24,10 +25,11 @@ class SendNewProjectMail implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(Project $project): void
+    public function handle(): void
     {
         // send welcome email to new user
+        $this->project->user->notify(new NewProjectNotification());
 
-        info('New project mail sent.');
+        info("New project email sent. Project title: {$this->project->title}");
     }
 }
